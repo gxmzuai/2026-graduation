@@ -1,0 +1,13 @@
+---
+import MainLayout from '../components/MainLayout.astro';
+import { ClassmateList } from '../components/members/ClassmateList';
+import classmatesData from '../content/members/classmates.json';
+
+const { classmates } = classmatesData;
+---
+
+<MainLayout title="班级成员 | 毕业纪念">
+  <div class="container mx-auto px-4 py-8">
+    <ClassmateList client:load classmates={classmates} />
+  </div>
+</MainLayout>

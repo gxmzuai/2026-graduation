@@ -1,0 +1,22 @@
+---
+import MainLayout from '../components/MainLayout.astro';
+import { Button } from "../components/ui/button";
+---
+
+<MainLayout title="广西民大2026届毕业留念">
+  <div class="container mx-auto px-4 py-12">
+    <div class="max-w-2xl mx-auto text-center">
+      <h1 class="text-4xl font-bold text-gray-900 mb-6">
+        欢迎来到广西民族大学2026届毕业留念
+      </h1>
+      <p class="text-lg text-gray-600 mb-8">
+        在这里，我们记录着每一个珍贵的瞬间，留存着我们在广西民族大学的美好回忆。
+      </p>
+      <Button client:load>
+        <a href="/gallery" class="inline-block">
+          浏览照片集
+        </a>
+      </Button>
+    </div>
+  </div>
+</MainLayout>

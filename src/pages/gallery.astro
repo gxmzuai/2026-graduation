@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import MainLayout from '../components/MainLayout.astro';
+import { GalleryTabs } from '../components/gallery/GalleryTabs';
+
+// 获取所有 gallery 集合数据
+const galleryData = await getCollection('gallery');
+
+// 处理数据
+const years = await Promise.all(
+  galleryData.map(async (entry) => {
+    // 从文件名中提取年份 ID，例如从 'year-1.md' 提取 '1'
+    const yearId = entry.id.match(/year-(\d+)/)?.[1] || '1';
+    return {
+      id: yearId,
+      images: entry.data.images
+    };
+  })
+);
+
+// 按年份排序
+years.sort((a, b) => a.id.localeCompare(b.id));
+---
+
+<MainLayout title="时光长廊 | 毕业纪念">
+  <div class="container mx-auto px-4 py-8">
+    <GalleryTabs client:load years={years} />
+  </div>
+</MainLayout>

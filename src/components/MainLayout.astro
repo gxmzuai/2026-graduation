@@ -1,0 +1,81 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const pathname = new URL(Astro.request.url).pathname;
+const currentYear = new Date().getFullYear();
+const copyrightYear = currentYear === 2025 ? '2025' : `2025-${currentYear}`;
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="广西民族大学2026届毕业留念" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="min-h-screen flex flex-col">
+      <!-- Navigation -->
+      <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-b z-50">
+        <div class="container mx-auto px-4">
+          <nav class="flex items-center justify-between h-16">
+            <a href="/" class="text-xl font-bold">
+              广西民大2026届
+            </a>
+            <ul class="flex space-x-8">
+              <li>
+                <a 
+                  href="/" 
+                  class={`hover:text-blue-600 transition-colors ${pathname === '/' ? 'text-blue-600' : ''}`}
+                >
+                  首页
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="/gallery" 
+                  class={`hover:text-blue-600 transition-colors ${pathname === '/gallery' ? 'text-blue-600' : ''}`}
+                >
+                  时光长廊
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="/roommates" 
+                  class={`hover:text-blue-600 transition-colors ${pathname === '/roommates' ? 'text-blue-600' : ''}`}
+                >
+                  宿舍成员
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="/classmates" 
+                  class={`hover:text-blue-600 transition-colors ${pathname === '/classmates' ? 'text-blue-600' : ''}`}
+                >
+                  班级成员
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="flex-grow pt-16">
+        <slot />
+      </main>
+
+      <!-- Footer -->
+      <footer class="py-6 bg-white border-t">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+          <p>© {copyrightYear} Made with ❤️ By Jiakai</p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
