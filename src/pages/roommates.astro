@@ -1,13 +1,52 @@
 ---
-import MainLayout from '../components/MainLayout.astro';
-import { RoommateList } from '../components/members/RoommateList';
-import roommatesData from '../content/members/roommates.json';
-
-const { roommates } = roommatesData;
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import MemberCard from '../components/MemberCard.astro';
+import Ornament from '../components/Ornament.astro';
+import { roommates } from '@/data/members';
 ---
 
-<MainLayout title="宿舍成员 | 毕业纪念">
-  <div class="container mx-auto px-4 py-8">
-    <RoommateList client:load roommates={roommates} />
+<BaseLayout title="宿舍" description="广西民族大学 2026 届毕业纪念 · 我们宿舍，六个人一间屋，三年光阴。">
+  <PageHeader
+    en="The Dorm"
+    label="宿舍"
+    title="六个人，一间宿舍，三年光阴"
+    caption="同一个屋檐下的清晨与深夜，是青春里最近的距离。"
+  />
+
+  <div class="shell pb-8">
+    <div class="roommate-grid">
+      {roommates.map((m, i) => <MemberCard member={m} variant="feature" index={i} />)}
+    </div>
   </div>
-</MainLayout>
+
+  <section class="shell-narrow pb-16 pt-10 text-center" data-reveal>
+    <div class="flex flex-col items-center gap-5">
+      <Ornament variant="band" class="h-3.5 w-44 text-gold/45" />
+      <p class="max-w-lg text-pretty font-serif text-lg leading-relaxed text-cream/90">
+        从天南海北住进同一间宿舍，
+        <br class="hidden sm:block" />
+        从此有人记得你熬过的夜、追过的梦。
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .roommate-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  @media (min-width: 640px) {
+    .roommate-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .roommate-grid {
+      gap: 1.75rem;
+    }
+  }
+</style>

@@ -1,0 +1,199 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ *  广西民族大学 2026 届毕业纪念 · 设计令牌（Tailwind v4 CSS-first）
+ *  静谧电影感：墨绿夜色 + 鎏金，民族纹样点缀
+ * ------------------------------------------------------------------ */
+@theme {
+  /* —— 色彩：深墨绿夜色为底，鎏金为魂 —— */
+  --color-ink: oklch(0.185 0.012 172); /* 页面底色，柔和的深墨绿 */
+  --color-ink-2: oklch(0.235 0.014 172); /* 卡片 / 抬升表面 */
+  --color-ink-3: oklch(0.288 0.016 172); /* 悬停表面 */
+  --color-line: oklch(0.345 0.013 172); /* 描边 / 分割线 */
+  --color-line-2: oklch(0.43 0.016 168); /* 较亮描边 */
+
+  --color-cream: oklch(0.95 0.012 70); /* 主文字，暖白 */
+  --color-mist: oklch(0.77 0.011 80); /* 次级文字 */
+  --color-faint: oklch(0.65 0.012 60); /* 弱化文字（AA 对比：≥4.5:1 于 ink/ink-2） */
+
+  /* 点缀色：柔和玫瑰金 / 暮粉（取意南宁市花·朱槿），不再用刺眼的纯金 */
+  --color-gold: oklch(0.81 0.066 38); /* 主点缀 —— 柔玫瑰金 */
+  --color-gold-2: oklch(0.71 0.07 33); /* 暗一档 */
+  --color-gold-soft: oklch(0.89 0.045 45); /* 高光浅粉 */
+  --color-jade: oklch(0.74 0.07 172); /* 玉色，第二点缀 */
+  --color-cinnabar: oklch(0.66 0.13 30); /* 朱砂，壮锦红 */
+
+  /* —— 字体 —— */
+  --font-display: "Cormorant Garamond", "Noto Serif SC", Georgia, serif;
+  --font-serif: "Noto Serif SC", "Songti SC", STSong, serif;
+  --font-sans: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei",
+    "Noto Sans SC", "Hiragino Sans GB", sans-serif;
+
+  /* —— 阴影 / 光晕 —— */
+  --shadow-card: 0 1px 0 0 oklch(1 0 0 / 0.04) inset,
+    0 24px 60px -28px oklch(0 0 0 / 0.85);
+  --shadow-glow: 0 0 0 1px oklch(0.81 0.066 38 / 0.35),
+    0 28px 70px -24px oklch(0 0 0 / 0.85);
+
+  /* —— 缓动 —— */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ------------------------------------------------------------------ *
+ *  基础层
+ * ------------------------------------------------------------------ */
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    scrollbar-color: var(--color-ink-3) var(--color-ink);
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-cream);
+    font-family: var(--font-sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.18;
+    letter-spacing: 0.01em;
+  }
+
+  ::selection {
+    background: var(--color-gold);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-ink);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-ink-3);
+    border: 3px solid var(--color-ink);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-line-2);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ *  版心容器
+ * ------------------------------------------------------------------ */
+@utility shell {
+  width: 100%;
+  max-width: 78rem;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 5vw, 2.75rem);
+}
+
+@utility shell-narrow {
+  width: 100%;
+  max-width: 52rem;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 5vw, 2.75rem);
+}
+
+/* 鎏金渐变文字 */
+@utility text-gilt {
+  background: linear-gradient(
+    180deg,
+    var(--color-gold-soft) 0%,
+    var(--color-gold) 48%,
+    var(--color-gold-2) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 顶部微光 / 暗角 */
+@utility vignette {
+  background:
+    radial-gradient(
+      120% 90% at 50% -8%,
+      oklch(0.3 0.04 168 / 0.55),
+      transparent 58%
+    ),
+    radial-gradient(
+      90% 60% at 50% 108%,
+      oklch(0.12 0.02 168 / 0.6),
+      transparent 60%
+    );
+}
+
+/* ------------------------------------------------------------------ *
+ *  入场动效（滚动揭示）
+ * ------------------------------------------------------------------ */
+@layer base {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(26px);
+    will-change: opacity, transform;
+  }
+  [data-reveal].is-in {
+    animation: reveal-up 0.95s var(--ease-out-soft) forwards;
+  }
+}
+
+@keyframes reveal-up {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(0.5deg);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

@@ -1,13 +1,211 @@
 ---
-import MainLayout from '../components/MainLayout.astro';
-import { ClassmateList } from '../components/members/ClassmateList';
-import classmatesData from '../content/members/classmates.json';
-
-const { classmates } = classmatesData;
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import MemberCard from '../components/MemberCard.astro';
+import { classmates, memberStats } from '@/data/members';
 ---
 
-<MainLayout title="班级成员 | 毕业纪念">
-  <div class="container mx-auto px-4 py-8">
-    <ClassmateList client:load classmates={classmates} />
+<BaseLayout title="班级" description="广西民族大学 2026 届毕业纪念 · 全班同学，一个集体里的每一个名字。">
+  <PageHeader
+    en="The Class"
+    label="班级"
+    title={`${memberStats.classCount} 个名字，一个集体`}
+    caption="来自天南海北，因同一段求学的缘分而相聚。"
+  />
+
+  <div class="shell pb-10">
+    <!-- 筛选栏 -->
+    <div class="cm-toolbar" data-reveal>
+      <div class="cm-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" class="size-4 text-faint">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-3.5-3.5" stroke-linecap="round" />
+        </svg>
+        <input
+          type="search"
+          data-cm-search
+          placeholder="搜索姓名或学号"
+          aria-label="搜索姓名或学号"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="cm-genders" role="group" aria-label="按性别筛选">
+        <button type="button" class="cm-gbtn" data-cm-gender="all" aria-pressed="true">
+          全部 <span class="cm-gbtn__n">{memberStats.classCount}</span>
+        </button>
+        <button type="button" class="cm-gbtn" data-cm-gender="男" aria-pressed="false">
+          男 <span class="cm-gbtn__n">{memberStats.maleCount}</span>
+        </button>
+        <button type="button" class="cm-gbtn" data-cm-gender="女" aria-pressed="false">
+          女 <span class="cm-gbtn__n">{memberStats.femaleCount}</span>
+        </button>
+      </div>
+    </div>
+
+    <p class="cm-result" role="status" aria-atomic="true">
+      显示 <span class="text-gold" data-cm-count>{memberStats.classCount}</span> /
+      {memberStats.classCount} 位同学
+    </p>
+
+    <!-- 名册 -->
+    <div class="cm-grid">
+      {
+        classmates.map((m, i) => (
+          <div class="cm-item" data-cm data-name={m.name} data-id={m.id} data-gender={m.gender}>
+            <MemberCard member={m} variant="compact" index={i} />
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="cm-empty" data-cm-empty role="status" hidden>没有找到匹配的同学，换个关键词试试？</p>
   </div>
-</MainLayout>
+</BaseLayout>
+
+<script>
+  const items = Array.from(document.querySelectorAll<HTMLElement>('[data-cm]'));
+  const search = document.querySelector<HTMLInputElement>('[data-cm-search]');
+  const countEl = document.querySelector<HTMLElement>('[data-cm-count]');
+  const emptyEl = document.querySelector<HTMLElement>('[data-cm-empty]');
+  const genderBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-cm-gender]'));
+
+  let gender = 'all';
+  let query = '';
+
+  const apply = () => {
+    const q = query.trim().toLowerCase();
+    let shown = 0;
+    items.forEach((it) => {
+      const name = (it.dataset.name ?? '').toLowerCase();
+      const id = it.dataset.id ?? '';
+      const matchGender = gender === 'all' || it.dataset.gender === gender;
+      const matchQuery = !q || name.includes(q) || id.includes(q);
+      const ok = matchGender && matchQuery;
+      it.classList.toggle('is-hidden', !ok);
+      if (ok) shown++;
+    });
+    if (countEl) countEl.textContent = String(shown);
+    if (emptyEl) emptyEl.hidden = shown !== 0;
+  };
+
+  search?.addEventListener('input', (e) => {
+    query = (e.target as HTMLInputElement).value;
+    apply();
+  });
+  genderBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      gender = btn.dataset.cmGender ?? 'all';
+      genderBtns.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      apply();
+    });
+  });
+</script>
+
+<style>
+  .cm-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  @media (min-width: 640px) {
+    .cm-toolbar {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+  .cm-search {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: var(--color-ink-2);
+    transition: border-color 0.3s;
+    flex: 1;
+    max-width: 22rem;
+  }
+  .cm-search:focus-within {
+    border-color: var(--color-gold);
+  }
+  .cm-search input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--color-cream);
+    font-size: 0.95rem;
+  }
+  .cm-search input::placeholder {
+    color: var(--color-faint);
+  }
+
+  .cm-genders {
+    display: inline-flex;
+    padding: 0.25rem;
+    gap: 0.2rem;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: var(--color-ink-2);
+  }
+  .cm-gbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0.55rem 0.95rem;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    color: var(--color-mist);
+    transition: background-color 0.25s, color 0.25s;
+  }
+  .cm-gbtn__n {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    color: var(--color-faint);
+  }
+  .cm-gbtn[aria-pressed='true'] {
+    background: var(--color-gold);
+    color: var(--color-ink);
+  }
+  .cm-gbtn[aria-pressed='true'] .cm-gbtn__n {
+    color: oklch(0.2 0.01 168 / 0.7);
+  }
+
+  .cm-result {
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--color-faint);
+  }
+
+  .cm-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  @media (min-width: 640px) {
+    .cm-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .cm-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+  .cm-item.is-hidden {
+    display: none;
+  }
+
+  .cm-empty {
+    margin-top: 2rem;
+    text-align: center;
+    color: var(--color-mist);
+  }
+</style>

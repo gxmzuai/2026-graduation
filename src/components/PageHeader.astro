@@ -1,0 +1,40 @@
+---
+import Ornament from './Ornament.astro';
+
+interface Props {
+  en: string;
+  label: string;
+  title: string;
+  caption?: string;
+}
+const { en, label, title, caption } = Astro.props;
+---
+
+<header class="relative overflow-hidden vignette">
+  <Ornament
+    variant="flower"
+    class="pointer-events-none absolute left-1/2 top-10 -z-0 w-[26rem] max-w-[80vw] -translate-x-1/2 text-gold opacity-[0.06] md:top-4"
+  />
+  <div class="shell relative z-10 flex flex-col items-center gap-5 pb-14 pt-36 text-center md:pb-20 md:pt-44">
+    <p class="flex items-center gap-3 text-gold" data-reveal>
+      <Ornament variant="diamond" class="size-3.5" />
+      <span class="text-xs font-medium uppercase tracking-[0.34em] text-gold/90">{en}</span>
+      <span class="font-serif text-sm tracking-widest text-gold/80">{label}</span>
+    </p>
+    <h1
+      class="text-balance font-serif text-4xl font-semibold leading-tight text-cream sm:text-5xl md:text-6xl"
+      data-reveal
+      data-reveal-delay="80"
+    >
+      {title}
+    </h1>
+    <Ornament variant="band" class="h-3.5 w-40 text-gold/55" data-reveal data-reveal-delay="140" />
+    {
+      caption && (
+        <p class="max-w-xl text-pretty leading-relaxed text-mist" data-reveal data-reveal-delay="200">
+          {caption}
+        </p>
+      )
+    }
+  </div>
+</header>
