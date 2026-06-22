@@ -1,0 +1,177 @@
+---
+import Avatar from './Avatar.astro';
+import Ornament from './Ornament.astro';
+import { type Member } from '@/data/members';
+
+interface Props {
+  member: Member;
+  variant?: 'feature' | 'compact';
+  index?: number;
+}
+const { member, variant = 'compact', index } = Astro.props;
+const isFemale = member.gender === '女';
+const num = index != null ? String(index + 1).padStart(2, '0') : undefined;
+---
+
+{
+  variant === 'feature' ? (
+    <article class="member-feature group" data-reveal data-reveal-delay={(index ?? 0) * 70}>
+      <div class="member-feature__corner">
+        <Ornament variant="diamond" class="size-4 text-gold/45" />
+      </div>
+      {num && <span class="member-feature__num">{num}</span>}
+
+      <div class="member-feature__avatar">
+        <Avatar qq={member.qq} name={member.name} size={640} />
+      </div>
+
+      <h3 class="font-serif text-2xl font-semibold text-cream">{member.name}</h3>
+
+      <p class="member-id">{member.id}</p>
+
+      <div class="mt-1 flex items-center justify-center">
+        <span class:list={['gender-chip', isFemale ? 'is-f' : 'is-m']}>
+          {isFemale ? '♀ 她' : '♂ 他'}
+        </span>
+      </div>
+    </article>
+  ) : (
+    <article class="member-compact group" data-reveal data-reveal-delay={((index ?? 0) % 12) * 45}>
+      <div class="member-compact__avatar">
+        <Avatar qq={member.qq} name={member.name} size={140} />
+        <span
+          class:list={['member-compact__dot', isFemale ? 'is-f' : 'is-m']}
+          aria-hidden="true"
+        />
+      </div>
+      <h3 class="mt-3 truncate font-serif text-lg font-medium text-cream">{member.name}</h3>
+      <p class="member-id text-xs">…{member.id.slice(-3)}</p>
+    </article>
+  )
+}
+
+<style>
+  /* —— 特写卡（宿舍） —— */
+  .member-feature {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 2.25rem 1.5rem 1.75rem;
+    text-align: center;
+    border: 1px solid var(--color-line);
+    border-radius: 1.25rem;
+    background:
+      radial-gradient(120% 80% at 50% -20%, oklch(0.27 0.02 168 / 0.55), transparent 62%),
+      var(--color-ink-2);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.45s var(--ease-out-soft), border-color 0.45s,
+      box-shadow 0.45s;
+  }
+  .member-feature:hover {
+    transform: translateY(-6px);
+    border-color: oklch(0.78 0.075 35 / 0.45);
+    box-shadow: var(--shadow-glow);
+  }
+  .member-feature__corner {
+    position: absolute;
+    top: 0.9rem;
+    right: 0.95rem;
+    opacity: 0.7;
+  }
+  .member-feature__num {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    letter-spacing: 0.2em;
+    color: var(--color-gold);
+    opacity: 0.85;
+  }
+  .member-feature__avatar {
+    width: clamp(4.5rem, 22vw, 8rem);
+    border-radius: 9999px;
+    padding: 4px;
+    background: linear-gradient(150deg, var(--color-gold), oklch(0.52 0.07 35) 60%, var(--color-line));
+    box-shadow: 0 12px 30px -12px oklch(0 0 0 / 0.7);
+  }
+
+  /* —— 紧凑卡（班级） —— */
+  .member-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.1rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    transition: transform 0.35s var(--ease-out-soft), background-color 0.35s,
+      border-color 0.35s;
+  }
+  .member-compact:hover {
+    transform: translateY(-4px);
+    background-color: var(--color-ink-2);
+    border-color: var(--color-line);
+  }
+  .member-compact__avatar {
+    position: relative;
+    width: clamp(3.75rem, 13vw, 5rem);
+    border-radius: 9999px;
+    padding: 2.5px;
+    background: linear-gradient(150deg, oklch(0.5 0.06 35), var(--color-line));
+    transition: background 0.35s;
+  }
+  .member-compact:hover .member-compact__avatar {
+    background: linear-gradient(150deg, var(--color-gold), oklch(0.52 0.07 35));
+  }
+  .member-compact__dot {
+    position: absolute;
+    right: 4%;
+    bottom: 4%;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 9999px;
+    border: 2px solid var(--color-ink);
+  }
+
+  .member-id {
+    font-family: var(--font-display);
+    letter-spacing: 0.06em;
+    color: var(--color-faint);
+  }
+
+  .gender-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    font-size: 0.78rem;
+    padding: 0 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+  }
+  .gender-chip.is-m,
+  .member-compact__dot.is-m {
+    color: var(--color-jade);
+    background: oklch(0.72 0.082 168 / 0.12);
+    border-color: oklch(0.72 0.082 168 / 0.4);
+  }
+  .member-compact__dot.is-m {
+    background: var(--color-jade);
+  }
+  .gender-chip.is-f,
+  .member-compact__dot.is-f {
+    color: var(--color-cinnabar);
+    background: oklch(0.64 0.15 33 / 0.12);
+    border-color: oklch(0.64 0.15 33 / 0.4);
+  }
+  .member-compact__dot.is-f {
+    background: var(--color-cinnabar);
+  }
+
+  /* 最窄手机（≤380px）：收紧特写卡内边距，给头像留出空间 */
+  @media (max-width: 380px) {
+    .member-feature {
+      padding: 1.75rem 1rem 1.5rem;
+    }
+  }
+</style>

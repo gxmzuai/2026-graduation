@@ -1,22 +1,603 @@
 ---
-import MainLayout from '../components/MainLayout.astro';
-import { Button } from "../components/ui/button";
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import Ornament from '../components/Ornament.astro';
+import Avatar from '../components/Avatar.astro';
+import heroImg from '../assets/gallery/year-1/1.jpg';
+import { SITE } from '@/data/site';
+import { classmates, memberStats } from '@/data/members';
+import { allPhotos, photoCount } from '@/data/gallery';
+
+const featured = allPhotos.slice(0, 5);
+const previewAvatars = classmates.slice(0, 12);
+const extraCount = Math.max(memberStats.classCount - previewAvatars.length, 0);
 ---
 
-<MainLayout title="广西民大2026届毕业留念">
-  <div class="container mx-auto px-4 py-12">
-    <div class="max-w-2xl mx-auto text-center">
-      <h1 class="text-4xl font-bold text-gray-900 mb-6">
-        欢迎来到广西民族大学2026届毕业留念
-      </h1>
-      <p class="text-lg text-gray-600 mb-8">
-        在这里，我们记录着每一个珍贵的瞬间，留存着我们在广西民族大学的美好回忆。
-      </p>
-      <Button client:load>
-        <a href="/gallery" class="inline-block">
-          浏览照片集
-        </a>
-      </Button>
+<BaseLayout>
+  {/* ——————————————————————————————— 序幕 ——————————————————————————————— */}
+  <section class="hero">
+    <div class="hero__bg">
+      <Image
+        src={heroImg}
+        alt="青秀山 · 春日花海"
+        widths={[768, 1280, 1920]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="hero__img"
+      />
+      <div class="hero__scrim"></div>
     </div>
-  </div>
-</MainLayout>
+
+    <div class="hero__content shell">
+      <h1 class="sr-only">{SITE.title}</h1>
+      <p class="hero__kicker" data-reveal>
+        <span class="tracking-[0.4em]">{SITE.school}</span>
+      </p>
+
+      <div class="hero__title" data-reveal data-reveal-delay="120">
+        <Ornament variant="flower" class="hero__sun" />
+        <span class="hero__year text-gilt">2026</span>
+      </div>
+
+      <p class="hero__sub" data-reveal data-reveal-delay="220">
+        <span class="hero__sub-en">Class of 2026 · 毕业纪念</span>
+      </p>
+
+      <p class="hero__poem font-serif" data-reveal data-reveal-delay="320">
+        山水一程，三秋一晤；<br />相思湖畔，后会有期。
+      </p>
+
+      <div class="hero__counter" data-reveal data-reveal-delay="420">
+        <span class="hero__counter-label">在一起的第</span>
+        <span class="hero__counter-num text-gilt" data-days data-countup data-start={SITE.startDate} data-end={SITE.endDate}>—</span>
+        <span class="hero__counter-label">天</span>
+      </div>
+    </div>
+
+    <a href="#prologue" class="hero__scroll" aria-label="向下浏览">
+      <span></span>
+    </a>
+  </section>
+
+  {/* ——————————————————————————————— 写在前面 ——————————————————————————————— */}
+  <section id="prologue" class="shell-narrow scroll-mt-24 py-24 text-center md:py-32">
+    <div data-reveal class="flex flex-col items-center gap-7">
+      <Ornament variant="diamond" class="size-5 text-gold" />
+      <p class="text-xs uppercase tracking-[0.34em] text-gold/80">Prologue · 写在前面</p>
+      <blockquote class="text-balance font-serif text-2xl leading-relaxed text-cream/95 sm:text-[1.7rem] md:text-3xl md:leading-[1.7]">
+        三年前，我们从四方赶来，在相思湖畔相遇；<br class="hidden sm:block" />
+        三年后，我们又将各奔前程，奔赴山海。
+      </blockquote>
+      <p class="max-w-xl text-pretty leading-relaxed text-mist">
+        这里收藏着我们一起走过的春夏秋冬——青秀山的花、南湖的月、博物馆里的铜鼓与壮锦，
+        还有每一张笑过的脸。愿往后想起，依然热泪盈眶。
+      </p>
+      <Ornament variant="band" class="h-3.5 w-44 text-gold/45" />
+    </div>
+  </section>
+
+  {/* ——————————————————————————————— 数字里的青春 ——————————————————————————————— */}
+  <section class="shell pb-24 md:pb-32">
+    <div class="stats" data-reveal>
+      <div class="stat">
+        <span class="stat__num text-gilt" data-days data-countup data-start={SITE.startDate} data-end={SITE.endDate}>—</span>
+        <span class="stat__label">在一起的天数</span>
+      </div>
+      <div class="stat">
+        <span class="stat__num text-gilt" data-countup data-to={memberStats.classCount}>0</span>
+        <span class="stat__label">位同窗</span>
+      </div>
+      <div class="stat">
+        <span class="stat__num text-gilt" data-countup data-to={memberStats.dormCount}>0</span>
+        <span class="stat__label">人的宿舍</span>
+      </div>
+      <div class="stat">
+        <span class="stat__num text-gilt" data-countup data-to={photoCount}>0</span>
+        <span class="stat__label">帧影像</span>
+      </div>
+      <div class="stat">
+        <span class="stat__num text-gilt">∞</span>
+        <span class="stat__label">段回忆</span>
+      </div>
+    </div>
+  </section>
+
+  {/* ——————————————————————————————— 时光长廊 ——————————————————————————————— */}
+  <section class="shell pb-24 md:pb-32">
+    <SectionHeader
+      en="Gallery"
+      eyebrow="时光长廊"
+      title="把时间，留在每一张照片里"
+      caption="那些被定格的瞬间，是我们对抗遗忘的方式。"
+    />
+
+    <div class="gallery-preview mt-14">
+      {
+        featured.map((p, i) => (
+          <a
+            href="/gallery"
+            class:list={['gp-card group', i === 0 && 'gp-card--lead']}
+            data-reveal
+            data-reveal-delay={i * 90}
+          >
+            <Image
+              src={p.src}
+              alt={p.title}
+              widths={[480, 768, 1100]}
+              sizes={i === 0 ? '(max-width: 768px) 100vw, 50vw' : '(max-width: 768px) 50vw, 25vw'}
+              class="gp-img"
+            />
+            <div class="gp-overlay">
+              <span class="gp-date font-display">{p.date}</span>
+              <span class="gp-title font-serif">{p.title}</span>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="mt-12 flex justify-center" data-reveal>
+      <a href="/gallery" class="btn-ghost">
+        走进时光长廊
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" class="size-4">
+          <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  {/* ——————————————————————————————— 我们 ——————————————————————————————— */}
+  <section class="relative overflow-hidden border-y border-line/60 vignette">
+    <div class="shell py-24 md:py-32">
+      <SectionHeader
+        en="The People"
+        eyebrow="我们"
+        title="一个集体，和每一个我们"
+        caption={`${memberStats.classCount} 个名字，${memberStats.dormCount} 人的宿舍，一段共同的青春。`}
+      />
+
+      <div class="mt-12 flex flex-col items-center gap-10" data-reveal>
+        <div class="avatar-cluster">
+          {
+            previewAvatars.map((m) => (
+              <span class="avatar-cluster__item">
+                <Avatar qq={m.qq} name={m.name} size={120} />
+              </span>
+            ))
+          }
+          {extraCount > 0 && <span class="avatar-cluster__more">+{extraCount}</span>}
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-4">
+          <a href="/classmates" class="btn-gold">认识全班同学</a>
+          <a href="/roommates" class="btn-ghost">走进我们宿舍</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ——————————————————————————————— 临别赠言 ——————————————————————————————— */}
+  <section class="shell-narrow py-28 text-center md:py-36">
+    <div data-reveal class="flex flex-col items-center gap-8">
+      <Ornament variant="flower" class="size-12 text-gold/80 animate-[float-slow_7s_ease-in-out_infinite]" />
+      <h2 class="text-balance font-display text-4xl font-semibold leading-tight text-gilt sm:text-5xl md:text-6xl">
+        愿你出走半生<br />归来仍是少年
+      </h2>
+      <p class="max-w-md text-pretty leading-relaxed text-mist">
+        毕业不是故事的结束，<br />而是带着这些回忆，奔赴下一程山海。
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const animateCount = (el: HTMLElement, to: number, fmt: (n: number) => string) => {
+    const dur = 1100;
+    let start: number | null = null;
+    const step = (t: number) => {
+      if (start === null) start = t;
+      const p = Math.min((t - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(Math.round(to * eased));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
+  const daysTogether = (startISO: string, endISO?: string) => {
+    const start = new Date(startISO + 'T00:00:00').getTime();
+    const end = endISO ? new Date(endISO + 'T23:59:59').getTime() : Infinity;
+    const now = Math.min(Date.now(), end);
+    // 含首日计数；毕业之后定格在相处总天数
+    return Math.max(1, Math.floor((now - start) / 86400000) + 1);
+  };
+
+  const run = () => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fmt = (n: number) => n.toLocaleString('en-US');
+
+    document.querySelectorAll<HTMLElement>('[data-countup]').forEach((el) => {
+      const to = el.hasAttribute('data-days')
+        ? daysTogether(el.dataset.start ?? '2023-09-10', el.dataset.end)
+        : Number(el.dataset.to ?? '0');
+      if (el.textContent === '∞') return;
+      if (reduce) {
+        el.textContent = fmt(to);
+        return;
+      }
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              animateCount(el, to, fmt);
+              obs.disconnect();
+            }
+          });
+        },
+        { threshold: 0.4 },
+      );
+      io.observe(el);
+    });
+  };
+  run();
+</script>
+
+<style>
+  /* ——— Hero ——— */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+  .hero__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    animation: hero-zoom 16s var(--ease-out-soft) forwards;
+  }
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.12);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  .hero__scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(110% 80% at 50% 40%, transparent 30%, oklch(0.13 0.015 168 / 0.55) 75%),
+      linear-gradient(to bottom, oklch(0.12 0.015 168 / 0.55) 0%, oklch(0.12 0.012 168 / 0.35) 35%, oklch(0.168 0.013 168 / 0.92) 92%);
+  }
+  .hero__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-top: 5rem;
+  }
+  .hero__kicker {
+    color: var(--color-gold);
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    margin-bottom: clamp(1rem, 4vw, 2rem);
+    padding-left: 0.4em;
+  }
+  .hero__title {
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+  .hero__sun {
+    position: absolute;
+    width: clamp(15rem, 46vw, 28rem);
+    color: var(--color-gold);
+    opacity: 0.16;
+    z-index: -1;
+    animation: float-slow 9s ease-in-out infinite;
+  }
+  @keyframes spin-slow {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .hero__year {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(6rem, 26vw, 16rem);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    filter: drop-shadow(0 10px 40px oklch(0 0 0 / 0.5));
+  }
+  .hero__sub {
+    margin-top: clamp(0.5rem, 2vw, 1rem);
+  }
+  .hero__sub-en {
+    font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--color-cream);
+  }
+  .hero__poem {
+    margin-top: clamp(1.75rem, 5vw, 2.75rem);
+    font-size: clamp(1.15rem, 4vw, 1.7rem);
+    line-height: 2;
+    color: var(--color-cream);
+    letter-spacing: 0.1em;
+  }
+  .hero__counter {
+    margin-top: clamp(1.75rem, 5vw, 2.5rem);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.6rem 1.4rem;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: oklch(0.168 0.013 168 / 0.4);
+    backdrop-filter: blur(6px);
+  }
+  .hero__counter-label {
+    font-size: 0.9rem;
+    color: var(--color-mist);
+  }
+  .hero__counter-num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+  }
+  .hero__scroll {
+    position: absolute;
+    bottom: 1.8rem;
+    left: 50%;
+    translate: -50% 0;
+    width: 1.55rem;
+    height: 2.6rem;
+    border: 1.5px solid var(--color-gold);
+    border-radius: 999px;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+  .hero__scroll:hover {
+    opacity: 1;
+  }
+  .hero__scroll span {
+    position: absolute;
+    top: 0.45rem;
+    left: 50%;
+    translate: -50% 0;
+    width: 3px;
+    height: 7px;
+    border-radius: 99px;
+    background: var(--color-gold);
+    animation: scroll-dot 1.8s var(--ease-out-soft) infinite;
+  }
+  @keyframes scroll-dot {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -4px);
+    }
+    40% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 0;
+      transform: translate(-50%, 10px);
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* ——— Stats ——— */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--color-line);
+    border: 1px solid var(--color-line);
+    border-radius: 1.25rem;
+    overflow: hidden;
+  }
+  /* 5 个统计项在 2 列下会留下半格空位 —— 末项跨满整行 */
+  .stat:last-child {
+    grid-column: 1 / -1;
+  }
+  @media (min-width: 768px) {
+    .stats {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .stat:last-child {
+      grid-column: auto;
+    }
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 2rem 1rem;
+    background:
+      radial-gradient(120% 80% at 50% 0%, oklch(0.24 0.018 168 / 0.5), transparent 70%),
+      var(--color-ink);
+  }
+  .stat__num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 6vw, 2.9rem);
+    line-height: 1;
+  }
+  .stat__label {
+    font-size: 0.85rem;
+    color: var(--color-mist);
+    letter-spacing: 0.05em;
+  }
+
+  /* ——— Gallery preview ——— */
+  .gallery-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+  @media (min-width: 768px) {
+    .gallery-preview {
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: 1fr;
+    }
+    .gp-card--lead {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+  }
+  .gp-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--color-line);
+  }
+  .gp-card--lead {
+    grid-column: span 2;
+  }
+  @media (min-width: 768px) {
+    .gp-card--lead {
+      aspect-ratio: auto;
+    }
+  }
+  .gp-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s var(--ease-out-soft);
+  }
+  .gp-card:hover .gp-img {
+    transform: scale(1.05);
+  }
+  .gp-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.2rem;
+    padding: 1.1rem 1.2rem;
+    background: linear-gradient(to top, oklch(0.1 0.01 168 / 0.85), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .gp-card:hover .gp-overlay {
+    opacity: 1;
+  }
+  /* 触屏设备无 hover —— 始终显示说明文字 */
+  @media (hover: none) {
+    .gp-overlay {
+      opacity: 1;
+    }
+  }
+  .gp-date {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: var(--color-gold);
+  }
+  .gp-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--color-cream);
+  }
+
+  /* ——— Avatar cluster ——— */
+  .avatar-cluster {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-left: 0.9rem;
+  }
+  .avatar-cluster__item {
+    width: clamp(3rem, 9vw, 3.75rem);
+    margin-left: -0.9rem;
+    border-radius: 999px;
+    padding: 2px;
+    background: var(--color-ink);
+    transition: transform 0.3s var(--ease-out-soft);
+  }
+  .avatar-cluster__item:hover {
+    transform: translateY(-6px) scale(1.06);
+    z-index: 2;
+  }
+  .avatar-cluster__more {
+    margin-left: -0.9rem;
+    width: clamp(3rem, 9vw, 3.75rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--color-ink-2);
+    border: 1px solid var(--color-line);
+    color: var(--color-gold);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  /* ——— Buttons ——— */
+  :global(.btn-gold),
+  :global(.btn-ghost) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.78rem 1.7rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: transform 0.3s var(--ease-out-soft), background-color 0.3s,
+      color 0.3s, border-color 0.3s;
+  }
+  :global(.btn-gold) {
+    background: var(--color-gold);
+    color: var(--color-ink);
+  }
+  :global(.btn-gold:hover) {
+    transform: translateY(-2px);
+    background: var(--color-gold-soft);
+  }
+  :global(.btn-ghost) {
+    border: 1px solid var(--color-line-2);
+    color: var(--color-cream);
+  }
+  :global(.btn-ghost:hover) {
+    transform: translateY(-2px);
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+  }
+
+  /* 极矮视口（横屏手机等）：让英雄区自适应高度，避免内容溢出与滚动提示叠压 */
+  @media (max-height: 560px) {
+    .hero {
+      min-height: auto;
+      padding-block: 4.5rem 3rem;
+    }
+    .hero__content {
+      padding-top: 0;
+    }
+    .hero__scroll {
+      display: none;
+    }
+  }
+  @media (orientation: landscape) and (max-height: 560px) {
+    .hero__year {
+      font-size: clamp(4rem, 14vh, 8rem);
+    }
+  }
+</style>

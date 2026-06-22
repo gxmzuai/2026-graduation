@@ -1,8 +1,12 @@
 import { defineConfig } from 'astro/config';
-import react from "@astrojs/react";
-import tailwind from "@astrojs/tailwind";
+import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
+// Pure Astro + Tailwind CSS v4 (via the official Vite plugin). No UI-framework
+// islands — every interactive bit ships as a tiny vanilla <script>.
 export default defineConfig({
-  integrations: [react(), tailwind()]
+  site: 'https://gxmzu.gujiakai.top',
+  vite: {
+    plugins: [tailwindcss()],
+  },
 });

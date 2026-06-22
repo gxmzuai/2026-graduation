@@ -1,0 +1,215 @@
+---
+import Ornament from './Ornament.astro';
+import { NAV, SITE } from '@/data/site';
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
+---
+
+<header class="site-nav" data-nav>
+  <div class="shell flex h-16 items-center justify-between gap-4 md:h-[4.5rem]">
+    <a href="/" class="group flex items-center gap-2.5" aria-label={`${SITE.school} 2026 届首页`}>
+      <Ornament variant="flower" class="size-7 text-gold transition-transform duration-700 group-hover:rotate-45" />
+      <span class="flex flex-col leading-none">
+        <span class="font-serif text-base font-semibold tracking-wide text-cream">广西民大 · 2026</span>
+        <span class="mt-0.5 text-[0.62rem] uppercase tracking-[0.3em] text-gold/70">Class of 2026</span>
+      </span>
+    </a>
+
+    <!-- 桌面导航 -->
+    <nav class="nav-desktop" aria-label="主导航">
+      {
+        NAV.map((link) => (
+          <a
+            href={link.href}
+            class:list={['nav-link', isActive(link.href) && 'is-active']}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <!-- 移动端开关 -->
+    <button
+      type="button"
+      class="nav-toggle"
+      data-nav-toggle
+      aria-label="打开菜单"
+      aria-expanded="false"
+      aria-controls="mobile-nav"
+    >
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- 移动端面板 -->
+  <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="移动导航" hidden>
+    <div class="shell flex flex-col gap-1 py-4">
+      {
+        NAV.map((link) => (
+          <a
+            href={link.href}
+            class:list={['mobile-link', isActive(link.href) && 'is-active']}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+          >
+            <span class="font-serif text-lg">{link.label}</span>
+            <span class="text-[0.7rem] uppercase tracking-[0.25em] text-gold/60">{link.en}</span>
+          </a>
+        ))
+      }
+    </div>
+  </nav>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-nav]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+  const panel = document.querySelector<HTMLElement>('[data-mobile-nav]');
+
+  if (toggle && panel && header) {
+    const setOpen = (open: boolean) => {
+      header.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
+      if (open) panel.hidden = false;
+      else setTimeout(() => { if (!header.classList.contains('is-open')) panel.hidden = true; }, 260);
+    };
+    toggle.addEventListener('click', () =>
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true'),
+    );
+    panel.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    });
+  }
+
+  // 滚动时给导航加上更实的底色
+  const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 24);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+</script>
+
+<style>
+  .site-nav {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    border-bottom: 1px solid transparent;
+    transition: background-color 0.4s var(--ease-out-soft), border-color 0.4s,
+      backdrop-filter 0.4s;
+  }
+  .site-nav.is-scrolled,
+  .site-nav.is-open {
+    background-color: oklch(0.185 0.012 172 / 0.82);
+    backdrop-filter: blur(14px) saturate(1.4);
+    border-bottom-color: var(--color-line);
+  }
+
+  /* 响应式显隐：放在作用域样式里用媒体查询控制，
+     避免 [data-astro-cid] 抬高的优先级压过 Tailwind 的 md: 工具类（曾导致桌面端仍显示汉堡按钮） */
+  .nav-desktop {
+    display: none;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  @media (min-width: 768px) {
+    .nav-desktop {
+      display: flex;
+    }
+    .nav-toggle {
+      display: none;
+    }
+    .mobile-nav {
+      display: none;
+    }
+  }
+
+  .nav-link {
+    position: relative;
+    padding: 0.5rem 0.95rem;
+    font-size: 0.95rem;
+    color: var(--color-mist);
+    border-radius: 999px;
+    transition: color 0.25s;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0.28rem;
+    height: 1.5px;
+    width: 0;
+    translate: -50% 0;
+    background: var(--color-gold);
+    transition: width 0.3s var(--ease-out-soft);
+  }
+  .nav-link:hover {
+    color: var(--color-cream);
+  }
+  .nav-link:hover::after {
+    width: 1.1rem;
+  }
+  .nav-link.is-active {
+    color: var(--color-gold);
+  }
+  .nav-link.is-active::after {
+    width: 1.1rem;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0 0.6rem;
+    border-radius: 0.75rem;
+  }
+  .nav-toggle span {
+    display: block;
+    height: 1.6px;
+    width: 100%;
+    background: var(--color-cream);
+    transition: transform 0.3s var(--ease-out-soft), opacity 0.2s;
+  }
+  .site-nav.is-open .nav-toggle span:nth-child(1) {
+    transform: translateY(6.6px) rotate(45deg);
+  }
+  .site-nav.is-open .nav-toggle span:nth-child(2) {
+    opacity: 0;
+  }
+  .site-nav.is-open .nav-toggle span:nth-child(3) {
+    transform: translateY(-6.6px) rotate(-45deg);
+  }
+
+  .mobile-nav {
+    overflow: hidden;
+    max-height: 0;
+    border-bottom: 1px solid transparent;
+    background-color: oklch(0.185 0.012 172 / 0.94);
+    backdrop-filter: blur(14px);
+    transition: max-height 0.32s var(--ease-out-soft), border-color 0.32s;
+  }
+  .site-nav.is-open .mobile-nav {
+    max-height: 22rem;
+    border-bottom-color: var(--color-line);
+  }
+  .mobile-link {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0.85rem 0.5rem;
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-mist);
+  }
+  .mobile-link:last-child {
+    border-bottom: none;
+  }
+  .mobile-link.is-active {
+    color: var(--color-gold);
+  }
+</style>

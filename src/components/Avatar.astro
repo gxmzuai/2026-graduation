@@ -1,0 +1,72 @@
+---
+import { qqAvatar, fallbackGradient } from '@/data/members';
+
+interface Props {
+  qq: string;
+  name: string;
+  size?: number;
+  class?: string;
+}
+const { qq, name, size = 160, class: className = '' } = Astro.props;
+const initial = name.trim().slice(0, 1);
+const grad = fallbackGradient(name);
+---
+
+<span
+  class:list={['avatar', className]}
+  style={`--avatar-fallback:${grad}`}
+  role="img"
+  aria-label={name}
+>
+  <span class="avatar__initial" aria-hidden="true">{initial}</span>
+  <img
+    class="avatar__img"
+    data-avatar
+    src={qqAvatar(qq, size)}
+    width={size}
+    height={size}
+    alt=""
+    loading="lazy"
+    decoding="async"
+    referrerpolicy="no-referrer"
+    onerror="this.classList.add('is-broken')"
+  />
+</span>
+
+<style>
+  .avatar {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: var(--avatar-fallback);
+    isolation: isolate;
+    container-type: size;
+  }
+  .avatar__initial {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-serif);
+    font-size: 44cqmin;
+    font-weight: 600;
+    line-height: 1;
+    color: oklch(0.95 0.02 88 / 0.92);
+  }
+  .avatar__img {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 无 JS 时图片若加载失败，至少显示底色而非「破图」图标 */
+    background: var(--avatar-fallback);
+    transition: opacity 0.4s var(--ease-out-soft);
+  }
+  /* 加载失败 → 隐去图片，露出底层姓名首字 */
+  .avatar__img.is-broken {
+    opacity: 0;
+  }
+</style>

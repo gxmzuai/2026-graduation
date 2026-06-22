@@ -1,0 +1,41 @@
+---
+import Ornament from './Ornament.astro';
+import { SITE, NAV } from '@/data/site';
+
+const startYear = 2025;
+const now = new Date().getFullYear();
+const span = now <= startYear ? `${startYear}` : `${startYear} — ${now}`;
+const journey = `${SITE.startDate.replaceAll('-', '.')} — ${SITE.endDate.replaceAll('-', '.')}`;
+---
+
+<footer class="relative mt-32 overflow-hidden border-t border-line/70 vignette">
+  <div class="shell py-16">
+    <div class="flex flex-col items-center gap-7 text-center">
+      <Ornament variant="flower" class="size-10 text-gold/80" />
+
+      <p class="max-w-md text-pretty font-serif text-lg leading-relaxed text-cream/90">
+        谨以此册，纪念我们在{SITE.school}相思湖畔
+        <br class="hidden sm:block" />共同走过的青春。
+      </p>
+
+      <Ornament variant="band" class="h-3.5 w-52 text-gold/45" />
+
+      <p class="font-display text-sm tracking-[0.25em] text-gold/75">{journey}</p>
+
+      <nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2" aria-label="页脚导航">
+        {
+          NAV.map((link) => (
+            <a href={link.href} class="inline-block px-1 py-2 text-sm text-mist transition-colors hover:text-gold">
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <div class="mt-2 space-y-1 text-xs text-faint">
+        <p class="tracking-wide">{SITE.school} · {SITE.schoolEn}</p>
+        <p>© {span} · Made with <span class="text-cinnabar">❤</span> by {SITE.author}</p>
+      </div>
+    </div>
+  </div>
+</footer>

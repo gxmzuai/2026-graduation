@@ -1,0 +1,53 @@
+---
+import Ornament from './Ornament.astro';
+
+interface Props {
+  eyebrow?: string;
+  en?: string;
+  title: string;
+  caption?: string;
+  align?: 'left' | 'center';
+  class?: string;
+}
+const { eyebrow, en, title, caption, align = 'center', class: className = '' } = Astro.props;
+const isCenter = align === 'center';
+---
+
+<header
+  data-reveal
+  class:list={[
+    'flex flex-col gap-4',
+    isCenter ? 'items-center text-center' : 'items-start text-left',
+    className,
+  ]}
+>
+  {
+    (eyebrow || en) && (
+      <div class="flex items-center gap-3 text-gold">
+        <Ornament variant="diamond" class="size-3.5" />
+        <span class="text-xs font-medium uppercase tracking-[0.32em] text-gold/90">
+          {en}
+        </span>
+        {eyebrow && <span class="font-serif text-sm tracking-widest text-gold/80">{eyebrow}</span>}
+      </div>
+    )
+  }
+
+  <h2 class="text-balance font-serif text-3xl font-semibold leading-tight text-cream sm:text-4xl md:text-[2.75rem]">
+    {title}
+  </h2>
+
+  {
+    isCenter && (
+      <Ornament variant="band" class="h-3.5 w-40 text-gold/55" />
+    )
+  }
+
+  {
+    caption && (
+      <p class:list={['max-w-xl text-pretty text-mist', isCenter ? 'mx-auto' : '']}>
+        {caption}
+      </p>
+    )
+  }
+</header>

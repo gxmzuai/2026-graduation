@@ -1,29 +1,214 @@
 ---
-import { getCollection } from 'astro:content';
-import MainLayout from '../components/MainLayout.astro';
-import { GalleryTabs } from '../components/gallery/GalleryTabs';
-
-// 获取所有 gallery 集合数据
-const galleryData = await getCollection('gallery');
-
-// 处理数据
-const years = await Promise.all(
-  galleryData.map(async (entry) => {
-    // 从文件名中提取年份 ID，例如从 'year-1.md' 提取 '1'
-    const yearId = entry.id.match(/year-(\d+)/)?.[1] || '1';
-    return {
-      id: yearId,
-      images: entry.data.images
-    };
-  })
-);
-
-// 按年份排序
-years.sort((a, b) => a.id.localeCompare(b.id));
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Ornament from '../components/Ornament.astro';
+import Lightbox from '../components/Lightbox.astro';
+import { galleryYears, allPhotos, photoCount } from '@/data/gallery';
 ---
 
-<MainLayout title="时光长廊 | 毕业纪念">
-  <div class="container mx-auto px-4 py-8">
-    <GalleryTabs client:load years={years} />
+<BaseLayout title="时光长廊" description="广西民族大学 2026 届毕业纪念 · 时光长廊，把三年的瞬间留在每一张照片里。">
+  <PageHeader
+    en="Gallery"
+    label="时光长廊"
+    title="把时间，留在每一张照片里"
+    caption={`目前收藏了 ${photoCount} 帧影像，按学年陈列。点开任意一张，慢慢回味。`}
+  />
+
+  <div class="shell pb-10">
+    {
+      galleryYears.map((year) => (
+        <section class="year scroll-mt-24" id={year.id}>
+          <header class="year__head" data-reveal>
+            <div class="year__meta">
+              <h2 class="year__label font-serif">{year.label}</h2>
+              <span class="year__period font-display text-gilt">{year.period}</span>
+            </div>
+            <div class="year__line" />
+            <Ornament variant="diamond" class="size-4 shrink-0 text-gold/60" />
+          </header>
+          <p class="year__caption" data-reveal>{year.caption}</p>
+
+          {year.photos.length > 0 ? (
+            <div class="masonry">
+              {year.photos.map((p, i) => (
+                <button
+                  type="button"
+                  class="photo group"
+                  data-lightbox-open={p.index}
+                  data-reveal
+                  data-reveal-delay={(i % 6) * 60}
+                  aria-label={`查看照片：${p.title}`}
+                >
+                  <Image
+                    src={p.src}
+                    alt={p.title}
+                    widths={[320, 480, 768]}
+                    sizes="(max-width: 767px) 48vw, (max-width: 1279px) 31vw, 23vw"
+                    class="photo__img"
+                  />
+                  <span class="photo__overlay">
+                    <span class="photo__date font-display">{p.date}</span>
+                    <span class="photo__title font-serif">{p.title}</span>
+                  </span>
+                  <span class="photo__ring" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div class="year__empty" data-reveal>
+              <Ornament variant="flower" class="size-10 text-gold/55" />
+              <p class="font-serif text-lg text-cream/90">这一页，还在书写</p>
+              <p class="max-w-sm text-sm text-mist">
+                {year.label} 的故事正在发生。等照片洗出来，它们会静静地出现在这里。
+              </p>
+            </div>
+          )}
+        </section>
+      ))
+    }
   </div>
-</MainLayout>
+
+  {
+    photoCount > 0 && (
+      <p class="shell pb-28 text-center text-sm text-faint" data-reveal>
+        更多照片，陆续上传中 ……
+      </p>
+    )
+  }
+
+  <Lightbox photos={allPhotos} />
+</BaseLayout>
+
+<style>
+  .year {
+    padding-top: 3.5rem;
+  }
+  .year:first-of-type {
+    padding-top: 1rem;
+  }
+  .year__head {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .year__meta {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    flex-shrink: 0;
+  }
+  .year__label {
+    font-size: clamp(1.6rem, 5vw, 2.25rem);
+    font-weight: 600;
+    color: var(--color-cream);
+  }
+  .year__period {
+    font-size: clamp(0.95rem, 3vw, 1.25rem);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+  .year__line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--color-line), transparent);
+  }
+  .year__caption {
+    margin-top: 0.6rem;
+    margin-bottom: 1.75rem;
+    color: var(--color-mist);
+    font-size: 0.95rem;
+  }
+
+  .masonry {
+    columns: 2;
+    gap: 0.9rem;
+  }
+  @media (min-width: 768px) {
+    .masonry {
+      columns: 3;
+      gap: 1.1rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .masonry {
+      columns: 4;
+    }
+  }
+
+  .photo {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin-bottom: 0.9rem;
+    break-inside: avoid;
+    border-radius: 0.85rem;
+    overflow: hidden;
+    background: var(--color-ink-2);
+    cursor: zoom-in;
+  }
+  @media (min-width: 768px) {
+    .photo {
+      margin-bottom: 1.1rem;
+    }
+  }
+  .photo__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 0.7s var(--ease-out-soft), filter 0.5s;
+  }
+  .photo:hover .photo__img {
+    transform: scale(1.04);
+    filter: brightness(0.7);
+  }
+  .photo__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    padding: 1rem 1.1rem;
+    background: linear-gradient(to top, oklch(0.1 0.01 168 / 0.7), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s var(--ease-out-soft);
+  }
+  .photo:hover .photo__overlay,
+  .photo:focus-visible .photo__overlay {
+    opacity: 1;
+  }
+  .photo__date {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: var(--color-gold);
+  }
+  .photo__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-cream);
+  }
+  .photo__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid transparent;
+    transition: border-color 0.4s;
+    pointer-events: none;
+  }
+  .photo:hover .photo__ring {
+    border-color: oklch(0.78 0.075 35 / 0.5);
+  }
+
+  .year__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    text-align: center;
+    padding: 3.5rem 1.5rem;
+    border: 1px dashed var(--color-line);
+    border-radius: 1.25rem;
+    background: radial-gradient(120% 90% at 50% 0%, oklch(0.22 0.016 168 / 0.5), transparent 70%);
+  }
+</style>
