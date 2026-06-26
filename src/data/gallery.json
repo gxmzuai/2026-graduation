@@ -1,0 +1,81 @@
+{
+  "photos": [
+    {
+      "year": "year-1",
+      "url": "https://i.see.you/2026/06/26/Hec7/20260626033943770.webp",
+      "title": "青秀山 · 春日花海",
+      "description": "佳航与柏村在春天的花海前驻足，那是研一的第一场远行。",
+      "date": "2024-04-04"
+    },
+    {
+      "year": "year-1",
+      "url": "https://i.see.you/2026/06/26/dkQ7/20260626034010761.webp",
+      "title": "青秀山 · 友谊长廊",
+      "description": "沿着友谊长廊一路向上，山风很轻，话题很多。",
+      "date": "2024-04-04"
+    },
+    {
+      "year": "year-1",
+      "url": "https://i.see.you/2026/06/26/0juA/20260626034034450.webp",
+      "title": "青秀山 · 高空绳索",
+      "description": "宿舍的伙伴们排队挑战高空绳索桥，笑声挂在半空。",
+      "date": "2024-04-04"
+    },
+    {
+      "year": "year-2",
+      "url": "https://i.see.you/2026/06/26/T7wu/20260626034155413.webp",
+      "title": "南湖 · 中秋",
+      "description": "中秋，去南湖公园陶冶情操。",
+      "date": "2024-09-17"
+    },
+    {
+      "year": "year-2",
+      "url": "https://i.see.you/2026/06/26/5gUg/20260626034228031.webp",
+      "title": "航洋城 · 国庆",
+      "description": "国庆假期挤进航洋城，看人间烟火。",
+      "date": "2024-10-01"
+    },
+    {
+      "year": "year-2",
+      "url": "https://i.see.you/2026/06/26/ub7R/20260626035540302.webp",
+      "title": "民族博物馆 · 党日",
+      "description": "党日活动走进广西民族博物馆，铜鼓与壮锦里，是另一种时间。",
+      "date": "2024-10-11"
+    },
+    {
+      "year": "year-3",
+      "url": "https://i.see.you/2026/06/26/2Vks/20260626044641757.webp",
+      "title": "朝阳广场海底捞",
+      "description": "和董博最后一聚在海底捞。",
+      "date": "2026-05-17"
+    },
+    {
+      "year": "year-3",
+      "url": "https://i.see.you/2026/06/26/i7Vl/20260626045430715.webp",
+      "title": "漫步中山路夜市",
+      "description": "和董博在中山路夜市散步。",
+      "date": "2026-05-17"
+    },
+    {
+      "year": "year-3",
+      "url": "https://i.see.you/2026/06/26/Vnf3/20260626045615021.webp",
+      "title": "在小北叔吃散伙饭",
+      "description": "和室友们最后聚餐于小北叔。",
+      "date": "2026-06-22"      
+    },
+        {
+      "year": "year-3",
+      "url": "https://i.see.you/2026/06/26/g6Sg/20260626045806187.webp",
+      "title": "去k歌的路上",
+      "description": "吃好散伙饭，去朝阳里k歌",
+      "date": "2026-06-22"      
+    },
+    {
+      "year": "year-3",
+      "url": "https://i.see.you/2026/06/26/bhB2/20260626045851027.webp",
+      "title": "去参加学位授予仪式",
+      "description": "和舍友们参加学位授予仪式",
+      "date": "2026-06-23"  
+    }
+  ]
+}

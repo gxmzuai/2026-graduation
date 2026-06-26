@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import type { GalleryPhoto } from '@/data/gallery';
 
 interface Props {
@@ -37,13 +36,13 @@ const { photos } = Astro.props;
           data-date={p.date}
           hidden={i !== 0}
         >
-          <Image
-            src={p.src}
+          <img
+            src={p.url}
             alt={p.title}
-            widths={[640, 1024, 1600, 2000]}
-            sizes="(max-width: 768px) 94vw, 88vw"
             class="lb-img"
             loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
           />
         </figure>
       ))

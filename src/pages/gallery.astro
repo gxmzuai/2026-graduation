@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Ornament from '../components/Ornament.astro';
@@ -40,12 +39,14 @@ import { galleryYears, allPhotos, photoCount } from '@/data/gallery';
                   data-reveal-delay={(i % 6) * 60}
                   aria-label={`查看照片：${p.title}`}
                 >
-                  <Image
-                    src={p.src}
+                  <img
+                    src={p.url}
                     alt={p.title}
-                    widths={[320, 480, 768]}
-                    sizes="(max-width: 767px) 48vw, (max-width: 1279px) 31vw, 23vw"
                     class="photo__img"
+                    loading="lazy"
+                    decoding="async"
+                    referrerpolicy="no-referrer"
+                    onerror="this.style.opacity='0'"
                   />
                   <span class="photo__overlay">
                     <span class="photo__date font-display">{p.date}</span>

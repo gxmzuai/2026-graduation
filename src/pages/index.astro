@@ -1,14 +1,14 @@
 ---
-import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import Ornament from '../components/Ornament.astro';
 import Avatar from '../components/Avatar.astro';
-import heroImg from '../assets/gallery/year-1/1.jpg';
 import { SITE } from '@/data/site';
 import { classmates, memberStats } from '@/data/members';
 import { allPhotos, photoCount } from '@/data/gallery';
 
+// 英雄背景沿用长廊里的第一张照片，保持单一数据源（在 gallery.json 中排在最前的一条）
+const heroPhoto = allPhotos[0];
 const featured = allPhotos.slice(0, 5);
 const previewAvatars = classmates.slice(0, 12);
 const extraCount = Math.max(memberStats.classCount - previewAvatars.length, 0);
@@ -18,15 +18,19 @@ const extraCount = Math.max(memberStats.classCount - previewAvatars.length, 0);
   {/* ——————————————————————————————— 序幕 ——————————————————————————————— */}
   <section class="hero">
     <div class="hero__bg">
-      <Image
-        src={heroImg}
-        alt="青秀山 · 春日花海"
-        widths={[768, 1280, 1920]}
-        sizes="100vw"
-        loading="eager"
-        fetchpriority="high"
-        class="hero__img"
-      />
+      {
+        heroPhoto && (
+          <img
+            src={heroPhoto.url}
+            alt={heroPhoto.title}
+            class="hero__img"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            referrerpolicy="no-referrer"
+          />
+        )
+      }
       <div class="hero__scrim"></div>
     </div>
 
@@ -122,12 +126,14 @@ const extraCount = Math.max(memberStats.classCount - previewAvatars.length, 0);
             data-reveal
             data-reveal-delay={i * 90}
           >
-            <Image
-              src={p.src}
+            <img
+              src={p.url}
               alt={p.title}
-              widths={[480, 768, 1100]}
-              sizes={i === 0 ? '(max-width: 768px) 100vw, 50vw' : '(max-width: 768px) 50vw, 25vw'}
               class="gp-img"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+              onerror="this.style.opacity='0'"
             />
             <div class="gp-overlay">
               <span class="gp-date font-display">{p.date}</span>
