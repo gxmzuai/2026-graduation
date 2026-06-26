@@ -1,0 +1,286 @@
+---
+import 'aplayer/dist/APlayer.min.css';
+import musicRaw from '@/data/music.json';
+
+/**
+ * 背景音乐播放器（基于 APlayer，纯 JS，无框架）。
+ * 曲目写在 src/data/music.json 的 tracks 数组里：
+ *   { "name": "歌名", "artist": "歌手", "url": "https://…/song.mp3", "cover": "https://…", "lrc": "https://…/x.lrc" }
+ * - url 必填（外链直链）；留空的曲目会被忽略，整张歌单为空则不渲染播放器。
+ * - cover / lrc 可选；没填封面时用站点的朱槿徽标兜底。
+ * 不自动播放——进站后由访客自己点开（符合浏览器自动播放策略，也更礼貌）。
+ */
+interface RawTrack {
+  name?: string;
+  artist?: string;
+  url?: string;
+  cover?: string;
+  lrc?: string;
+}
+
+const tracks = (musicRaw as { tracks: RawTrack[] }).tracks ?? [];
+const audio = tracks
+  .filter((t) => typeof t.url === 'string' && t.url.trim() !== '')
+  .map((t) => ({
+    name: t.name?.trim() || '未命名',
+    artist: t.artist?.trim() || '佚名',
+    url: t.url!.trim(),
+    cover: t.cover?.trim() || '/apple-touch-icon.png', // 缺省封面：站点朱槿徽标
+    ...(t.lrc?.trim() ? { lrc: t.lrc.trim() } : {}),
+  }));
+const hasMusic = audio.length > 0;
+---
+
+{
+  hasMusic && (
+    <div class="music-player" transition:persist>
+      <div id="grad-aplayer" role="region" aria-label="背景音乐播放器" />
+      {/* 转义 < 以防将来某首歌名/链接里出现 </script> 提前闭合脚本 */}
+      <script
+        id="aplayer-data"
+        type="application/json"
+        is:inline
+        set:html={JSON.stringify(audio).replace(/</g, '\\u003c')}
+      />
+    </div>
+  )
+}
+
+<script>
+  import APlayer from 'aplayer';
+
+  type Track = { name: string; artist: string; url: string; cover?: string; lrc?: string };
+
+  const init = () => {
+    const container = document.getElementById('grad-aplayer');
+    const dataEl = document.getElementById('aplayer-data');
+    // 守卫：无歌单 / 已初始化（兼容将来可能的客户端路由）则跳过
+    if (!container || !dataEl || container.dataset.ready) return;
+
+    let audio: Track[] = [];
+    try {
+      audio = JSON.parse(dataEl.textContent || '[]');
+    } catch {
+      audio = [];
+    }
+    if (!audio.length) return;
+
+    container.dataset.ready = '1';
+    new APlayer({
+      container,
+      fixed: true, // 左下角悬浮迷你条
+      autoplay: false, // 进站不自动播放，由访客点开
+      mutex: true,
+      preload: 'none',
+      theme: '#dba898', // 站点柔玫瑰金（与朱槿徽标同色系）
+      loop: 'all',
+      order: 'list',
+      volume: 0.6,
+      // 默认收起歌单：固定模式下展开的歌单会叠在条上方（多曲时整体高约 160px），
+      // 收起后静息高度≈66px，正好对应下方为页脚预留的内边距；点歌单图标可随时展开。
+      listFolded: true,
+      lrcType: audio.some((a) => a.lrc) ? 3 : 0, // 有歌词外链才解析，否则关掉以免空歌词条
+      audio,
+    });
+
+    // 渐进增强可达性：APlayer 1.10.1 的播放/上一首/下一首是带 click 的 <span>，
+    // 既不能聚焦也无可访问名——键盘用户无法触发播放。这里补 role/tabindex/键盘激活与中文标签，
+    // 装饰性 SVG 标记 aria-hidden。对原生 <button>（音量/顺序/循环/歌单/歌词）只补标签，
+    // 不重复加 keydown，以免回车触发两次。
+    const LABELS: Array<[string, string]> = [
+      ['.aplayer-icon-play', '播放 / 暂停'],
+      ['.aplayer-icon-back', '上一首'],
+      ['.aplayer-icon-forward', '下一首'],
+      ['.aplayer-icon-menu', '歌单'],
+      ['.aplayer-icon-order', '播放顺序'],
+      ['.aplayer-icon-loop', '循环模式'],
+      ['.aplayer-icon-lrc', '歌词'],
+    ];
+    LABELS.forEach(([sel, label]) => {
+      container.querySelectorAll<HTMLElement>(sel).forEach((el) => {
+        if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', label);
+        el.querySelectorAll('svg').forEach((s) => s.setAttribute('aria-hidden', 'true'));
+        if (el.tagName !== 'BUTTON') {
+          el.setAttribute('role', 'button');
+          el.setAttribute('tabindex', '0');
+          el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              el.click();
+            }
+          });
+        }
+      });
+    });
+
+    // 进站轻提示：柔光呼吸几秒，邀请访客点开（每浏览器只提示一次，避免打扰）
+    let hinted = false;
+    try {
+      hinted = localStorage.getItem('grad-music-hinted') === '1';
+    } catch {
+      hinted = false;
+    }
+    if (!hinted) {
+      container.classList.add('is-hint');
+      window.setTimeout(() => container.classList.remove('is-hint'), 6200);
+      try {
+        localStorage.setItem('grad-music-hinted', '1');
+      } catch {
+        /* 隐私模式下忽略 */
+      }
+    }
+  };
+
+  // 播放器用 transition:persist 跨页保活，只需初始化一次；
+  // 监听 astro:page-load（首次加载也会触发），靠 dataset.ready 守卫避免重复初始化。
+  document.addEventListener('astro:page-load', init);
+</script>
+
+<style is:global>
+  /* ——————————————————————————————————————————————————————————————
+   *  APlayer 暗色皮肤覆写（默认皮肤是白底，这里贴合站点的电影感墨绿 + 柔玫瑰金）
+   *  作用域统一收在 #grad-aplayer 下：id 选择器优先级恒高于 APlayer 自带的类选择器，
+   *  因此无需 !important 即可稳压默认皮肤。
+   * —————————————————————————————————————————————————————————————— */
+  #grad-aplayer.aplayer {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* 悬浮条主体 */
+  #grad-aplayer.aplayer-fixed .aplayer-body {
+    background: oklch(0.2 0.014 172 / 0.92);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid var(--color-line);
+    border-right: 1px solid var(--color-line);
+    border-radius: 0 0.85rem 0 0;
+    box-shadow: 0 -10px 40px -16px oklch(0 0 0 / 0.7);
+  }
+
+  /* 文案 */
+  #grad-aplayer .aplayer-info {
+    border-color: var(--color-line);
+  }
+  #grad-aplayer .aplayer-title {
+    color: var(--color-cream);
+  }
+  #grad-aplayer .aplayer-author {
+    color: var(--color-faint);
+  }
+  #grad-aplayer .aplayer-time {
+    color: var(--color-faint);
+  }
+
+  /* 控制图标（播放器内的小图标）—— 默认 #666，hover 给金 */
+  #grad-aplayer .aplayer-time .aplayer-icon path {
+    fill: var(--color-mist);
+  }
+  #grad-aplayer .aplayer-time .aplayer-icon:hover path {
+    fill: var(--color-gold);
+  }
+
+  /* 进度条：底轨 / 已缓冲（已播放与滑块用 APlayer 内联 theme 色 = 金，保留） */
+  #grad-aplayer .aplayer-bar {
+    background: var(--color-line);
+  }
+  #grad-aplayer .aplayer-loaded {
+    background: var(--color-line-2);
+  }
+  #grad-aplayer .aplayer-volume-bar {
+    background: var(--color-line);
+  }
+  #grad-aplayer .aplayer-volume-bar-wrap {
+    background: transparent;
+  }
+
+  /* 歌单 */
+  #grad-aplayer .aplayer-list {
+    background: oklch(0.2 0.014 172 / 0.96);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+  #grad-aplayer.aplayer-fixed .aplayer-list {
+    border-color: var(--color-line);
+  }
+  #grad-aplayer .aplayer-list ol li {
+    border-top-color: var(--color-line);
+    color: var(--color-mist);
+  }
+  #grad-aplayer .aplayer-list ol li:hover {
+    background: oklch(0.288 0.016 172 / 0.7);
+  }
+  #grad-aplayer .aplayer-list ol li.aplayer-list-light {
+    background: oklch(0.288 0.016 172 / 0.92);
+  }
+  #grad-aplayer .aplayer-list-index,
+  #grad-aplayer .aplayer-list-author {
+    color: var(--color-faint);
+  }
+  #grad-aplayer .aplayer-list ol::-webkit-scrollbar-thumb {
+    background-color: var(--color-line);
+  }
+  #grad-aplayer .aplayer-list ol::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-line-2);
+  }
+
+  /* 折叠/展开切换块 */
+  #grad-aplayer .aplayer-miniswitcher {
+    background: oklch(0.288 0.016 172 / 0.95);
+  }
+  #grad-aplayer .aplayer-miniswitcher .aplayer-icon path {
+    fill: var(--color-mist);
+  }
+  #grad-aplayer .aplayer-miniswitcher .aplayer-icon:hover path {
+    fill: var(--color-gold);
+  }
+
+  /* 歌词（若某曲提供了 lrc 外链） */
+  #grad-aplayer .aplayer-lrc p {
+    color: var(--color-mist);
+  }
+  #grad-aplayer .aplayer-lrc p.aplayer-lrc-current {
+    color: var(--color-cream);
+  }
+
+  /* 键盘可见焦点环：APlayer 自带 .aplayer-icon{outline:none}（未分层，会盖过站点的 :focus-visible），
+     这里在 #grad-aplayer 作用域内补回焦点环——同为未分层声明，且 id 选择器提权，确保生效。 */
+  #grad-aplayer .aplayer-icon:focus-visible,
+  #grad-aplayer .aplayer-list ol li:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  /* 给页面底部留出悬浮条的高度，避免常驻播放器盖住页脚内容。
+     用 [data-ready]（JS 初始化后才加）作门槛：无 JS 时播放器根本不出现，
+     此时不应留出幽灵内边距，也不应隐藏滚动提示。 */
+  body:has(#grad-aplayer[data-ready]) {
+    padding-bottom: 4.5rem;
+  }
+
+  /* 响应式：窄屏下左下角悬浮条会与首页居中的「向下滚动」提示重叠（几何上一直到约 825px：
+     提示居中、悬浮条自 left:0 起宽至多 400px），故断点取 840px，宽屏二者不重叠则保留提示。
+     :has(...[data-ready]) 里的 id 使整条选择器优先级高过 .hero__scroll 的作用域样式，无需 !important。 */
+  @media (max-width: 840px) {
+    body:has(#grad-aplayer[data-ready]) .hero__scroll {
+      display: none;
+    }
+  }
+
+  /* 进站轻提示：柔金呼吸（prefers-reduced-motion 下由全局规则自动关停） */
+  @keyframes player-pulse {
+    0%,
+    100% {
+      box-shadow: 0 -10px 40px -16px oklch(0 0 0 / 0.7), 0 0 0 0 oklch(0.81 0.066 38 / 0);
+    }
+    50% {
+      box-shadow: 0 -10px 40px -16px oklch(0 0 0 / 0.7), 0 0 0 6px oklch(0.81 0.066 38 / 0.16);
+    }
+  }
+  #grad-aplayer.is-hint.aplayer-fixed .aplayer-body {
+    animation: player-pulse 2s var(--ease-out-soft) 3;
+  }
+</style>

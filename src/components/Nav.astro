@@ -65,31 +65,49 @@ const isActive = (href: string) =>
 </header>
 
 <script>
-  const header = document.querySelector<HTMLElement>('[data-nav]');
-  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
-  const panel = document.querySelector<HTMLElement>('[data-mobile-nav]');
+  // 导航在每次客户端路由后会重新渲染（用于更新当前页高亮），因此元素绑定要在
+  // astro:page-load 时对新节点重做；而 window 级监听（滚动、Esc）只注册一次，
+  // 通过可变引用指向当前导航节点，避免每次翻页累积重复监听。
+  let header: HTMLElement | null = null;
+  let toggle: HTMLButtonElement | null = null;
+  let panel: HTMLElement | null = null;
 
-  if (toggle && panel && header) {
-    const setOpen = (open: boolean) => {
-      header.classList.toggle('is-open', open);
-      toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
-      if (open) panel.hidden = false;
-      else setTimeout(() => { if (!header.classList.contains('is-open')) panel.hidden = true; }, 260);
-    };
+  const setOpen = (open: boolean) => {
+    if (!header || !toggle || !panel) return;
+    header.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
+    if (open) panel.hidden = false;
+    else {
+      const p = panel;
+      setTimeout(() => {
+        if (header && !header.classList.contains('is-open')) p.hidden = true;
+      }, 260);
+    }
+  };
+
+  const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 24);
+
+  // 只注册一次
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+
+  const setupNav = () => {
+    header = document.querySelector<HTMLElement>('[data-nav]');
+    toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+    panel = document.querySelector<HTMLElement>('[data-mobile-nav]');
+    if (!header || !toggle || !panel) return;
+
     toggle.addEventListener('click', () =>
-      setOpen(toggle.getAttribute('aria-expanded') !== 'true'),
+      setOpen(toggle!.getAttribute('aria-expanded') !== 'true'),
     );
     panel.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') setOpen(false);
-    });
-  }
+    onScroll(); // 进入新页面后按当前滚动位置即时校正底色
+  };
 
-  // 滚动时给导航加上更实的底色
-  const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 24);
-  onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
+  document.addEventListener('astro:page-load', setupNav);
 </script>
 
 <style>

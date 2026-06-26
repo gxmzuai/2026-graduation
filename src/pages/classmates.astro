@@ -64,42 +64,50 @@ import { classmates, memberStats } from '@/data/members';
 </BaseLayout>
 
 <script>
-  const items = Array.from(document.querySelectorAll<HTMLElement>('[data-cm]'));
-  const search = document.querySelector<HTMLInputElement>('[data-cm-search]');
-  const countEl = document.querySelector<HTMLElement>('[data-cm-count]');
-  const emptyEl = document.querySelector<HTMLElement>('[data-cm-empty]');
-  const genderBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-cm-gender]'));
+  // 视图过渡下打包脚本只执行一次；班级页内容会在每次进入时换成新节点，
+  // 因此把绑定收进 setup()，在 astro:page-load（含首次加载）时对当前页元素重建。
+  // 本脚本只绑定页面内元素、无 window 级监听，故无需去重守卫。
+  const setupClassmates = () => {
+    const items = Array.from(document.querySelectorAll<HTMLElement>('[data-cm]'));
+    if (items.length === 0) return; // 不在班级页则空跑
+    const search = document.querySelector<HTMLInputElement>('[data-cm-search]');
+    const countEl = document.querySelector<HTMLElement>('[data-cm-count]');
+    const emptyEl = document.querySelector<HTMLElement>('[data-cm-empty]');
+    const genderBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-cm-gender]'));
 
-  let gender = 'all';
-  let query = '';
+    let gender = 'all';
+    let query = '';
 
-  const apply = () => {
-    const q = query.trim().toLowerCase();
-    let shown = 0;
-    items.forEach((it) => {
-      const name = (it.dataset.name ?? '').toLowerCase();
-      const id = it.dataset.id ?? '';
-      const matchGender = gender === 'all' || it.dataset.gender === gender;
-      const matchQuery = !q || name.includes(q) || id.includes(q);
-      const ok = matchGender && matchQuery;
-      it.classList.toggle('is-hidden', !ok);
-      if (ok) shown++;
-    });
-    if (countEl) countEl.textContent = String(shown);
-    if (emptyEl) emptyEl.hidden = shown !== 0;
-  };
+    const apply = () => {
+      const q = query.trim().toLowerCase();
+      let shown = 0;
+      items.forEach((it) => {
+        const name = (it.dataset.name ?? '').toLowerCase();
+        const id = it.dataset.id ?? '';
+        const matchGender = gender === 'all' || it.dataset.gender === gender;
+        const matchQuery = !q || name.includes(q) || id.includes(q);
+        const ok = matchGender && matchQuery;
+        it.classList.toggle('is-hidden', !ok);
+        if (ok) shown++;
+      });
+      if (countEl) countEl.textContent = String(shown);
+      if (emptyEl) emptyEl.hidden = shown !== 0;
+    };
 
-  search?.addEventListener('input', (e) => {
-    query = (e.target as HTMLInputElement).value;
-    apply();
-  });
-  genderBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      gender = btn.dataset.cmGender ?? 'all';
-      genderBtns.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    search?.addEventListener('input', (e) => {
+      query = (e.target as HTMLInputElement).value;
       apply();
     });
-  });
+    genderBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        gender = btn.dataset.cmGender ?? 'all';
+        genderBtns.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+        apply();
+      });
+    });
+  };
+
+  document.addEventListener('astro:page-load', setupClassmates);
 </script>
 
 <style>

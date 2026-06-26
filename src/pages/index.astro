@@ -247,7 +247,9 @@ const extraCount = Math.max(memberStats.classCount - previewAvatars.length, 0);
       io.observe(el);
     });
   };
-  run();
+  // 视图过渡下脚本只执行一次；监听 astro:page-load 使首页计数在首次加载与
+  // 每次回到首页时都会重新触发（其他页无 [data-countup]，自动空跑）。
+  document.addEventListener('astro:page-load', run);
 </script>
 
 <style>

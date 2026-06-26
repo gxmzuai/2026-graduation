@@ -1,0 +1,22 @@
+{
+  "tracks": [
+    {
+      "name": "青春常驻",
+      "artist": "张敬轩",
+      "url": "https://music.gujiakai.top/2026/youth_forever.mp3",
+      "cover": "https://i.see.you/2026/06/26/Cfc0/20260626051900778.webp"
+    },
+    {
+      "name": "兰亭序",
+      "artist": "周杰伦",
+      "url": "https://music.gujiakai.top/2026/preface_to_the_orchid_pavilion.mp3",
+      "cover": "https://i.see.you/2026/06/26/Znx7/20260626052001445.webp"
+    },
+    {
+      "name": "红颜旧",
+      "artist": "刘涛",
+      "url": "https://music.gujiakai.top/2026/beauty_of_old.mp3",
+      "cover": "https://i.see.you/2026/06/26/Ima2/20260626053417327.webp"
+    }
+  ]
+}

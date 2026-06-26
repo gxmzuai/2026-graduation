@@ -60,8 +60,24 @@ const { photos } = Astro.props;
 </dialog>
 
 <script>
-  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]');
-  if (dialog) {
+  // 灯箱与缩略图触发器都属于画廊页内容，视图过渡后会换成新节点，
+  // 因此元素绑定在 astro:page-load 时对新节点重做；window 键盘监听只注册一次，
+  // 通过模块级引用 lb 指向当前灯箱，避免反复进入画廊页时累积重复监听。
+  type LB = { dialog: HTMLDialogElement; prev: () => void; next: () => void };
+  let lb: LB | null = null;
+
+  window.addEventListener('keydown', (e) => {
+    if (!lb || !lb.dialog.open) return;
+    if (e.key === 'ArrowLeft') lb.prev();
+    else if (e.key === 'ArrowRight') lb.next();
+  });
+
+  const setupLightbox = () => {
+    const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+    if (!dialog) {
+      lb = null; // 离开画廊页：解除引用，键盘监听随之空跑
+      return;
+    }
     const slides = Array.from(dialog.querySelectorAll<HTMLElement>('[data-lb-slide]'));
     const total = slides.length;
     const elTitle = dialog.querySelector<HTMLElement>('[data-lb-title]');
@@ -71,6 +87,7 @@ const { photos } = Astro.props;
     let current = 0;
 
     const render = (i: number) => {
+      if (!total) return;
       current = (i + total) % total;
       slides.forEach((s, idx) => {
         s.hidden = idx !== current;
@@ -110,11 +127,6 @@ const { photos } = Astro.props;
     dialog.addEventListener('close', () => {
       document.body.style.overflow = '';
     });
-    window.addEventListener('keydown', (e) => {
-      if (!dialog.open) return;
-      if (e.key === 'ArrowLeft') render(current - 1);
-      else if (e.key === 'ArrowRight') render(current + 1);
-    });
 
     // 移动端左右滑动切换
     const stage = dialog.querySelector<HTMLElement>('[data-lb-stage]');
@@ -134,7 +146,11 @@ const { photos } = Astro.props;
       },
       { passive: true },
     );
-  }
+
+    lb = { dialog, prev: () => render(current - 1), next: () => render(current + 1) };
+  };
+
+  document.addEventListener('astro:page-load', setupLightbox);
 </script>
 
 <style>
