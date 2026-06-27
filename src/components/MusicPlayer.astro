@@ -297,14 +297,6 @@ const hasMusic = audio.length > 0;
     transition: transform 0.3s ease;
   }
 
-  /* 窄屏（≤480px）下，居中的页脚末行可能探入左下角 66px 悬浮封面的范围——
-     仅此时为底部留出悬浮条高度，避免页脚链接/版权被缩略图压住。
-     桌面/平板不触发，页脚仍然落到页面最底，没有空隙。 */
-  @media (max-width: 480px) {
-    body:has(#grad-aplayer[data-ready]) {
-      padding-bottom: 4.5rem;
-    }
-  }
 
   /* 进站轻提示：柔金呼吸（prefers-reduced-motion 下由全局规则自动关停） */
   @keyframes player-pulse {
