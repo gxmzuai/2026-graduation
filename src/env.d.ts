@@ -31,9 +31,11 @@ declare module 'aplayer' {
   }
   export default class APlayer {
     constructor(options: APlayerOptions);
+    mode: 'mini' | 'normal';
     play(): void;
     pause(): void;
     toggle(): void;
+    setMode(mode: 'mini' | 'normal'): void;
     seek(time: number): void;
     volume(percentage: number, nostorage?: boolean): void;
     notice(text: string, time?: number, opacity?: number): void;

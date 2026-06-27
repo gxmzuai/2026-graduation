@@ -126,23 +126,12 @@ const isActive = (href: string) =>
     border-bottom-color: var(--color-line);
   }
 
-  /* 响应式显隐：放在作用域样式里用媒体查询控制，
-     避免 [data-astro-cid] 抬高的优先级压过 Tailwind 的 md: 工具类（曾导致桌面端仍显示汉堡按钮） */
+  /* 响应式显隐用作用域媒体查询控制（避免 [data-astro-cid] 优先级压过 Tailwind 的 md: 工具类）。
+     真正的 @media 覆盖块放在样式表末尾——见文件底部，确保按源码顺序胜过下面的 .nav-toggle 基础规则。 */
   .nav-desktop {
     display: none;
     align-items: center;
     gap: 0.25rem;
-  }
-  @media (min-width: 768px) {
-    .nav-desktop {
-      display: flex;
-    }
-    .nav-toggle {
-      display: none;
-    }
-    .mobile-nav {
-      display: none;
-    }
   }
 
   .nav-link {
@@ -229,5 +218,18 @@ const isActive = (href: string) =>
   }
   .mobile-link.is-active {
     color: var(--color-gold);
+  }
+
+  /* 桌面端（≥768px）显隐覆盖：必须放在所有基础规则之后。
+     同优先级（均为 .foo[data-astro-cid]）下后写者胜——此前该块写在 .nav-toggle 基础规则之前，
+     导致 .nav-toggle{display:inline-flex} 反压过媒体查询里的 display:none，桌面端仍显示汉堡按钮。 */
+  @media (min-width: 768px) {
+    .nav-desktop {
+      display: flex;
+    }
+    .nav-toggle,
+    .mobile-nav {
+      display: none;
+    }
   }
 </style>

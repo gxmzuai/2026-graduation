@@ -66,7 +66,7 @@ const hasMusic = audio.length > 0;
     if (!audio.length) return;
 
     container.dataset.ready = '1';
-    new APlayer({
+    const ap = new APlayer({
       container,
       fixed: true, // 左下角悬浮迷你条
       autoplay: false, // 进站不自动播放，由访客点开
@@ -95,6 +95,7 @@ const hasMusic = audio.length > 0;
       ['.aplayer-icon-order', '播放顺序'],
       ['.aplayer-icon-loop', '循环模式'],
       ['.aplayer-icon-lrc', '歌词'],
+      ['.aplayer-icon-volume-down', '音量'],
     ];
     LABELS.forEach(([sel, label]) => {
       container.querySelectorAll<HTMLElement>(sel).forEach((el) => {
@@ -112,6 +113,33 @@ const hasMusic = audio.length > 0;
         }
       });
     });
+
+    // 封面缩略图常驻可见（迷你态下控制条隐藏，主播放入口就是点封面）——补键盘可达
+    const pic = container.querySelector<HTMLElement>('.aplayer-pic');
+    if (pic) {
+      pic.setAttribute('role', 'button');
+      pic.setAttribute('tabindex', '0');
+      pic.setAttribute('aria-label', '播放 / 暂停');
+      pic.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          ap.toggle();
+        }
+      });
+    }
+    // 展开/收起按钮：APlayer 的结构是 <div.aplayer-miniswitcher><button.aplayer-icon>，
+    // 原生 button 本就可聚焦、回车/空格激活（click 冒泡到外层 div 上 APlayer 的处理器）。
+    // 因此只给这个 button 补可访问名、隐藏装饰 svg；切勿再给外层 div 加 role/tabindex——
+    // 否则会多出一个 tab 焦点，且空格会在 button 上双触发（keydown 冒泡 + 原生激活）相互抵消。
+    const miniBtn = container.querySelector<HTMLButtonElement>('.aplayer-miniswitcher button');
+    if (miniBtn) {
+      miniBtn.setAttribute('aria-label', '展开 / 收起播放器');
+      miniBtn.querySelectorAll('svg').forEach((s) => s.setAttribute('aria-hidden', 'true'));
+    }
+
+    // 静息为迷你态：左下角 66px 小封面，绝不与居中的页脚/英雄内容重叠——
+    // 因此底部无需再留白，页脚自然落到页面最底（无空隙）。访客点封面播放、点箭头展开完整控制。
+    ap.setMode('mini');
 
     // 进站轻提示：柔光呼吸几秒，邀请访客点开（每浏览器只提示一次，避免打扰）
     let hinted = false;
@@ -254,19 +282,27 @@ const hasMusic = audio.length > 0;
     border-radius: 3px;
   }
 
-  /* 给页面底部留出悬浮条的高度，避免常驻播放器盖住页脚内容。
-     用 [data-ready]（JS 初始化后才加）作门槛：无 JS 时播放器根本不出现，
-     此时不应留出幽灵内边距，也不应隐藏滚动提示。 */
-  body:has(#grad-aplayer[data-ready]) {
-    padding-bottom: 4.5rem;
+  /* 播放器静息为迷你态（左下角 66px 小封面），与居中的页脚/英雄内容互不重叠，
+     因此底部不预留空间——页脚自然落到页面最底，没有空隙。展开成完整条只是临时遮挡，可再收起。 */
+
+  /* 迷你态下 APlayer 用 transform:scaleX(0) 把控制条藏起来，但元素仍留在 tab 序与无障碍树里；
+     收起时改用 visibility:hidden 让它真正退出键盘/读屏（展开为 normal 态时自动恢复）。
+     收起态的键盘操作由常驻可见的封面（播放）与展开按钮承担。 */
+  #grad-aplayer.aplayer-narrow .aplayer-info {
+    visibility: hidden;
+  }
+  /* APlayer 给 .aplayer-info 设了 transition:all .3s——会让 visible→hidden 延迟到动画末尾，
+     收起后控件仍有约 300ms 可被 tab/读屏到。这里只过渡 transform，保留缩放动画的同时让 visibility 立即生效。 */
+  #grad-aplayer .aplayer-info {
+    transition: transform 0.3s ease;
   }
 
-  /* 响应式：窄屏下左下角悬浮条会与首页居中的「向下滚动」提示重叠（几何上一直到约 825px：
-     提示居中、悬浮条自 left:0 起宽至多 400px），故断点取 840px，宽屏二者不重叠则保留提示。
-     :has(...[data-ready]) 里的 id 使整条选择器优先级高过 .hero__scroll 的作用域样式，无需 !important。 */
-  @media (max-width: 840px) {
-    body:has(#grad-aplayer[data-ready]) .hero__scroll {
-      display: none;
+  /* 窄屏（≤480px）下，居中的页脚末行可能探入左下角 66px 悬浮封面的范围——
+     仅此时为底部留出悬浮条高度，避免页脚链接/版权被缩略图压住。
+     桌面/平板不触发，页脚仍然落到页面最底，没有空隙。 */
+  @media (max-width: 480px) {
+    body:has(#grad-aplayer[data-ready]) {
+      padding-bottom: 4.5rem;
     }
   }
 
